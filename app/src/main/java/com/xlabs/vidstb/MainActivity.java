@@ -24,6 +24,9 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -114,6 +117,19 @@ public class MainActivity extends AppCompatActivity implements ConversionService
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        View root = findViewById(R.id.rootLayout);
+        int initialPaddingLeft = root.getPaddingLeft();
+        int initialPaddingTop = root.getPaddingTop();
+        int initialPaddingRight = root.getPaddingRight();
+        int initialPaddingBottom = root.getPaddingBottom();
+        ViewCompat.setOnApplyWindowInsetsListener(root, (view, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()
+                    | WindowInsetsCompat.Type.displayCutout());
+            view.setPadding(initialPaddingLeft + insets.left, initialPaddingTop + insets.top,
+                    initialPaddingRight + insets.right, initialPaddingBottom + insets.bottom);
+            return windowInsets;
+        });
+        ViewCompat.requestApplyInsets(root);
         preferences = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         subtitleContainer = findViewById(R.id.subtitleContainer);
         videoInfoText = findViewById(R.id.videoInfoText);
