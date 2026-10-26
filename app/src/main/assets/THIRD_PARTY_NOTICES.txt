@@ -1,0 +1,9 @@
+This application uses FFmpegKit maintained and FFmpeg, including libass and x264.
+
+FFmpegKit maintained: https://github.com/ffmpegkit-maintained/ffmpeg-kit
+FFmpeg: https://ffmpeg.org/
+libass: https://github.com/libass/libass
+x264: https://www.videolan.org/developers/x264.html
+
+The selected ffmpeg-kit-full-gpl binary is distributed under GNU GPL version 3.
+Review the upstream license and source availability requirements before distributing this application.

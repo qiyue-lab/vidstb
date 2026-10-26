@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Vidstb</string>
+    <string name="settings">设置</string>
+    <string name="select_video">选择 MKV 视频</string>
+    <string name="no_video">尚未选择视频</string>
+    <string name="subtitle_tracks">内嵌字幕（可多选）</string>
+    <string name="start_conversion">生成硬字幕视频</string>
+    <string name="cancel_conversion">取消任务</string>
+    <string name="open_result">打开结果</string>
+    <string name="quality_summary">保持原分辨率和帧率 · 高质量 H.264 · 音频直接复制</string>
+    <string name="hardware_acceleration">硬件加速</string>
+    <string name="hardware_summary">优先使用设备 MediaCodec 编码；失败时回退软件编码</string>
+    <string name="quality_notice">硬字幕必须重新编码，无法保证数学意义上的无损。本工具不会降低分辨率或帧率，并优先保留视觉质量。</string>
+    <string name="close">关闭</string>
+    <string name="processing">正在处理…</string>
+    <string name="waiting">选择视频和至少一条字幕后开始</string>
+    <string name="notification_channel">视频转码</string>
+    <string name="notification_title">正在生成硬字幕视频</string>
+    <string name="unsupported_subtitle">暂不支持</string>
+</resources>
