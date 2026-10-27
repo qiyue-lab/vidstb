@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+        <TextView style="@style/Text.Vidstb.SectionTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="整体音量" />
+        <TextView android:id="@+id/masterVolumeText" style="@style/Text.Vidstb.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="整体音量 100%" />
+        <SeekBar android:id="@+id/masterVolumeSeek" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="200" />
+        <CheckBox android:id="@+id/globalMuteCheck" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="输出全程静音" />
+        <TextView style="@style/Text.Vidstb.SectionTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="替换整条音轨" />
+        <TextView style="@style/Text.Vidstb.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="选择后将忽略原声和背景音乐" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/replacementAudioButton" style="@style/Widget.Vidstb.Button.Outlined" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="选择替换音轨（再次点击清除）" />
+        <TextView android:id="@+id/replacementAudioPathText" style="@style/Text.Vidstb.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="middle" android:maxLines="1" android:text="未选择，使用原视频声音" />
+        <TextView style="@style/Text.Vidstb.SectionTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="背景音乐混音" />
+        <TextView android:id="@+id/originalVolumeText" style="@style/Text.Vidstb.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="原声音量 100%" />
+        <SeekBar android:id="@+id/originalVolumeSeek" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="200" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/backgroundAudioButton" style="@style/Widget.Vidstb.Button.Outlined" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="选择背景音乐（再次点击清除）" />
+        <TextView android:id="@+id/backgroundAudioPathText" style="@style/Text.Vidstb.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:ellipsize="middle" android:maxLines="1" android:text="未选择背景音乐" />
+        <TextView android:id="@+id/backgroundVolumeText" style="@style/Text.Vidstb.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="背景音乐音量 100%" />
+        <SeekBar android:id="@+id/backgroundVolumeSeek" android:layout_width="match_parent" android:layout_height="wrap_content" android:max="200" />
+    </LinearLayout>
+</ScrollView>

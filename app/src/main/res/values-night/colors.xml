@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="app_primary">#A5B4FC</color>
+    <color name="app_primary_variant">#818CF8</color>
+    <color name="app_on_primary">#17172A</color>
+    <color name="app_secondary">#5EEAD4</color>
+    <color name="app_background">#121218</color>
+    <color name="app_surface">#1D1D26</color>
+    <color name="app_surface_variant">#2A2A36</color>
+    <color name="app_on_surface">#E8E8EF</color>
+    <color name="app_on_surface_variant">#B7B7C4</color>
+    <color name="app_outline">#3B3B49</color>
+    <color name="app_preview">#08080B</color>
+</resources>

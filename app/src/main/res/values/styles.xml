@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Widget.Vidstb.Card" parent="Widget.MaterialComponents.CardView">
+        <item name="cardBackgroundColor">?attr/colorSurface</item>
+        <item name="cardCornerRadius">@dimen/card_radius</item>
+        <item name="cardElevation">0dp</item>
+        <item name="strokeColor">@color/app_outline</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <style name="Widget.Vidstb.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:insetTop">4dp</item>
+        <item name="android:insetBottom">4dp</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+    </style>
+
+    <style name="Widget.Vidstb.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:insetTop">4dp</item>
+        <item name="android:insetBottom">4dp</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="strokeColor">@color/app_outline</item>
+    </style>
+
+    <style name="Widget.Vidstb.Button.Text" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:minHeight">@dimen/button_height</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:insetTop">4dp</item>
+        <item name="android:insetBottom">4dp</item>
+    </style>
+
+    <style name="Text.Vidstb.SectionTitle" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textSize">17sp</item>
+    </style>
+
+    <style name="Text.Vidstb.Caption" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:textColor">?attr/colorOnSurfaceVariant</item>
+        <item name="android:lineSpacingExtra">2dp</item>
+    </style>
+</resources>

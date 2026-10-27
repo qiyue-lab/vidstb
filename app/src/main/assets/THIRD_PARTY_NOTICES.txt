@@ -1,4 +1,4 @@
-This application uses FFmpegKit maintained and FFmpeg, including libass and x264.
+This application uses FFmpegKit maintained and FFmpeg, including libass and x264, and AndroidX Media3.
 
 FFmpegKit maintained: https://github.com/ffmpegkit-maintained/ffmpeg-kit
 FFmpeg: https://ffmpeg.org/

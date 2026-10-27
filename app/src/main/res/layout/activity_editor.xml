@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/editorRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/backEditorButton"
+            style="@style/Widget.Vidstb.Button.Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="返回" />
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="视频编辑"
+                android:textAppearance="?attr/textAppearanceHeadline6"
+                android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Text.Vidstb.Caption"
+                android:text="剪切、合并、画面与音频" />
+        </LinearLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/exportButton"
+            style="@style/Widget.Vidstb.Button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="导出" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/preview_height"
+        android:background="@color/app_preview">
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/playerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:show_buffering="always"
+            app:use_controller="false" />
+        <com.xlabs.vidstb.CropOverlayView
+            android:id="@+id/cropOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+    </FrameLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="@dimen/page_padding">
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Vidstb.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/card_padding">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Text.Vidstb.SectionTitle"
+                        android:text="预览与剪切点" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:orientation="horizontal">
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/playPauseButton"
+                            style="@style/Widget.Vidstb.Button.Outlined"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="播放" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/previousFrameButton"
+                            style="@style/Widget.Vidstb.Button.Text"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="上一帧" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/nextFrameButton"
+                            style="@style/Widget.Vidstb.Button.Text"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="下一帧" />
+                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/currentTimeText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:fontFamily="monospace"
+                        android:gravity="center"
+                        android:text="00:00:00.000"
+                        android:textAppearance="?attr/textAppearanceSubtitle1" />
+                    <com.xlabs.vidstb.FrameStripView
+                        android:id="@+id/frameStrip"
+                        android:layout_width="match_parent"
+                        android:layout_height="92dp"
+                        android:layout_marginTop="8dp" />
+                    <TextView
+                        style="@style/Text.Vidstb.Caption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:text="拖动帧条定位 · 双指缩放 · 拖动两侧手柄剪辑" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <EditText
+                            android:id="@+id/startTimeEdit"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="monospace"
+                            android:hint="开始时间"
+                            android:inputType="text"
+                            android:textSize="13sp" />
+                        <EditText
+                            android:id="@+id/endTimeEdit"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:fontFamily="monospace"
+                            android:hint="结束时间"
+                            android:inputType="text"
+                            android:textSize="13sp" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/applyTimesButton"
+                            style="@style/Widget.Vidstb.Button.Text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="应用" />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/setStartButton"
+                            style="@style/Widget.Vidstb.Button.Outlined"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="当前帧为开始" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/setEndButton"
+                            style="@style/Widget.Vidstb.Button.Outlined"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="当前帧为结束" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Vidstb.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/section_spacing">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/card_padding">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Text.Vidstb.SectionTitle"
+                        android:text="片段时间线" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/segmentList"
+                        android:layout_width="match_parent"
+                        android:layout_height="158dp"
+                        android:layout_marginTop="8dp" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/addVideosButton"
+                            style="@style/Widget.Vidstb.Button"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="添加视频" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/addSegmentButton"
+                            style="@style/Widget.Vidstb.Button.Outlined"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="同源片段" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/duplicateSegmentButton"
+                            style="@style/Widget.Vidstb.Button.Outlined"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="复制" />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/moveLeftButton"
+                            style="@style/Widget.Vidstb.Button.Text"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="左移" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/moveRightButton"
+                            style="@style/Widget.Vidstb.Button.Text"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="右移" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/deleteSegmentButton"
+                            style="@style/Widget.Vidstb.Button.Text"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="删除" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Vidstb.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/section_spacing">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/card_padding">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Text.Vidstb.SectionTitle"
+                        android:text="画面与片段声音" />
+                    <TextView
+                        style="@style/Text.Vidstb.Caption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="拖动预览上的裁剪框，或选择固定比例" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <Spinner
+                            android:id="@+id/aspectSpinner"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/resetCropButton"
+                            style="@style/Widget.Vidstb.Button.Text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="重置裁剪" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/rotateButton"
+                            style="@style/Widget.Vidstb.Button.Text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="旋转90°" />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <CheckBox
+                            android:id="@+id/flipHCheck"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="水平镜像" />
+                        <CheckBox
+                            android:id="@+id/flipVCheck"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="垂直镜像" />
+                        <CheckBox
+                            android:id="@+id/segmentMuteCheck"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="片段静音" />
+                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/segmentVolumeText"
+                        style="@style/Text.Vidstb.Caption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="片段音量 100%" />
+                    <SeekBar
+                        android:id="@+id/segmentVolumeSeek"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="200"
+                        android:progress="100" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.Vidstb.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/section_spacing"
+                android:layout_marginBottom="16dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/card_padding">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Text.Vidstb.SectionTitle"
+                        android:text="输出与任务" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/outputSettingsButton"
+                        style="@style/Widget.Vidstb.Button.Outlined"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="分辨率、帧率与转场设置" />
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/audioSettingsButton"
+                        style="@style/Widget.Vidstb.Button.Outlined"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="整体音频、替换音轨与背景音乐" />
+                    <TextView
+                        android:id="@+id/projectSummaryText"
+                        style="@style/Text.Vidstb.Caption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="请添加视频"
+                        android:textStyle="bold" />
+                    <ProgressBar
+                        android:id="@+id/exportProgress"
+                        style="?android:attr/progressBarStyleHorizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:max="100"
+                        android:visibility="gone" />
+                    <TextView
+                        android:id="@+id/exportStatus"
+                        style="@style/Text.Vidstb.Caption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/cancelEditExportButton"
+                            style="@style/Widget.Vidstb.Button.Outlined"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:enabled="false"
+                            android:text="取消导出" />
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/openEditResultButton"
+                            style="@style/Widget.Vidstb.Button.Text"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:enabled="false"
+                            android:text="打开编辑结果" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

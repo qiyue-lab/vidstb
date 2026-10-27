@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+        <TextView style="@style/Text.Vidstb.SectionTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="输出画面" />
+        <TextView style="@style/Text.Vidstb.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="分辨率预设，或输入自定义偶数尺寸" />
+        <Spinner android:id="@+id/resolutionPreset" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+            <EditText android:id="@+id/outputWidthEdit" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:hint="宽度" android:inputType="number" />
+            <EditText android:id="@+id/outputHeightEdit" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:hint="高度" android:inputType="number" />
+        </LinearLayout>
+        <TextView style="@style/Text.Vidstb.Caption" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:text="帧率（1–120 fps）" />
+        <Spinner android:id="@+id/frameRatePreset" android:layout_width="match_parent" android:layout_height="wrap_content" />
+        <EditText android:id="@+id/outputFrameRateEdit" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="自定义帧率" android:inputType="number" />
+        <TextView style="@style/Text.Vidstb.SectionTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="片段转场" />
+        <CheckBox android:id="@+id/transitionEnabledCheck" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="所有衔接处使用淡入淡出" />
+        <EditText android:id="@+id/transitionMsEdit" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="转场时长（0–5000 毫秒）" android:inputType="number" />
+    </LinearLayout>
+</ScrollView>

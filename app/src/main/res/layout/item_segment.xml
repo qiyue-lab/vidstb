@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="158dp"
+    android:layout_height="match_parent"
+    android:layout_margin="4dp"
+    app:cardBackgroundColor="?attr/colorSurface"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/app_outline"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="6dp">
+        <ImageView
+            android:id="@+id/segmentImage"
+            android:layout_width="match_parent"
+            android:layout_height="76dp"
+            android:background="@color/app_preview"
+            android:contentDescription="视频缩略图"
+            android:scaleType="centerCrop" />
+        <TextView
+            android:id="@+id/segmentName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textStyle="bold" />
+        <TextView
+            android:id="@+id/segmentTime"
+            style="@style/Text.Vidstb.Caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:textSize="10sp" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

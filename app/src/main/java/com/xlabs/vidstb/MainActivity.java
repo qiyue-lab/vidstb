@@ -141,7 +141,9 @@ public class MainActivity extends AppCompatActivity implements ConversionService
         cancelButton = findViewById(R.id.cancelButton);
         openResultButton = findViewById(R.id.openResultButton);
 
-        selectVideoButton.setOnClickListener(v -> videoPicker.launch(new String[]{"video/*", "*/*"}));
+        selectVideoButton.setOnClickListener(v -> videoPicker.launch(new String[]{"video/*"}));
+        findViewById(R.id.openEditorButton).setOnClickListener(v ->
+                startActivity(new Intent(this, EditorActivity.class)));
         settingsButton.setOnClickListener(v -> showSettings());
         startButton.setOnClickListener(v -> startConversion());
         cancelButton.setOnClickListener(v -> {
