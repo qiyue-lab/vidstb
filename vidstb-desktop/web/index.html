@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2563eb">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Vidstb">
+<title>Vidstb 电脑版 · 内嵌字幕转硬字幕</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">VS</div>
+    <div>
+      <h1>Vidstb 电脑版</h1>
+      <p>提取视频内嵌字幕，烧录为硬字幕</p>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <div id="ffmpegChip" class="chip chip-warn">正在检测 ffmpeg…</div>
+    <div id="gpuChip" class="chip chip-muted hidden"></div>
+    <button class="btn btn-ghost" id="detectBtn">检测显卡</button>
+    <button class="btn" id="lanBtn" title="扫码用手机打开本工具">手机访问</button>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="subtitle">内嵌字幕 → 硬字幕</button>
+    <button class="tab" data-tab="merge">视频合并（4K60）</button>
+    <button class="tab" data-tab="resources">网盘资源库</button>
+    <button class="tab" data-tab="pansou">盘搜（全网找资源）</button>
+  </nav>
+
+  <div class="tab-panel" id="panel-subtitle">
+
+  <!-- 文件与字幕 -->
+  <section class="card">
+    <div class="card-head">
+      <h2>视频与字幕轨</h2>
+      <div class="head-actions">
+        <button class="btn btn-primary" id="pickBtn">选择视频</button>
+        <button class="btn" id="scanBtn">扫描文件夹</button>
+        <button class="btn btn-ghost" id="nativePickBtn" title="调用 Windows 原生文件选择框，弹不出来时会自动改用内置浏览器">系统弹窗</button>
+        <button class="btn" id="addSelectedBtn">加入队列</button>
+      </div>
+    </div>
+    <div class="path-row">
+      <input type="text" id="pathInput" placeholder="也可以直接粘贴视频绝对路径，回车添加">
+      <button class="btn btn-ghost" id="pathAddBtn">添加</button>
+    </div>
+    <div id="fileList" class="file-list">
+      <p class="empty">还没有选择视频。支持 MKV / MP4 / MOV 等容器，可一次导入多个文件批量处理。</p>
+    </div>
+  </section>
+
+  <!-- 输出设置 -->
+  <section class="card">
+    <div class="card-head">
+      <h2>输出设置</h2>
+      <div class="head-actions">
+        <button class="btn btn-ghost" id="toggleStyleBtn">字幕样式</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <label class="field">
+        <span>编码模式</span>
+        <select id="encoderMode">
+          <option value="auto">自动（优先显卡，失败回退 CPU）</option>
+          <option value="hardware">只用显卡加速</option>
+          <option value="software">只用 CPU 高质量</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>显卡编码器</span>
+        <select id="hwEncoder">
+          <option value="auto">自动选择</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>CPU 画质 CRF</span>
+        <input type="number" id="crf" min="10" max="30" step="1">
+      </label>
+      <label class="field">
+        <span>CPU 编码预设</span>
+        <select id="preset">
+          <option value="veryslow">veryslow（最慢最省码率）</option>
+          <option value="slower">slower</option>
+          <option value="slow">slow（默认）</option>
+          <option value="medium">medium</option>
+          <option value="fast">fast</option>
+          <option value="veryfast">veryfast</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>显卡码率倍率</span>
+        <input type="number" id="hwBitrateRatio" min="1" max="4" step="0.1">
+      </label>
+      <label class="field">
+        <span>并行任务数</span>
+        <input type="number" id="parallel" min="1" max="8" step="1">
+      </label>
+      <label class="field">
+        <span>输出容器</span>
+        <select id="container">
+          <option value="mkv">MKV（保留章节与字体附件）</option>
+          <option value="mp4">MP4（兼容性最好）</option>
+        </select>
+      </label>
+      <label class="field wide">
+        <span>输出目录</span>
+        <div class="row">
+          <input type="text" id="outputDir" placeholder="留空表示与源视频同目录">
+          <button class="btn btn-ghost" id="pickOutputDirBtn">浏览</button>
+        </div>
+      </label>
+    </div>
+
+    <div class="grid" id="stylePanel" style="display:none">
+      <label class="field">
+        <span>字体</span>
+        <select id="fontName">
+          <option value="">沿用字幕自带字体</option>
+          <option value="Microsoft YaHei">微软雅黑 Microsoft YaHei</option>
+          <option value="SimHei">黑体 SimHei</option>
+          <option value="SimSun">宋体 SimSun</option>
+          <option value="KaiTi">楷体 KaiTi</option>
+          <option value="Noto Sans CJK SC">思源黑体 Noto Sans CJK SC</option>
+          <option value="Arial">Arial</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>字号</span>
+        <input type="number" id="fontSize" min="0" max="120" step="1" placeholder="0 = 自带">
+      </label>
+      <label class="field">
+        <span>描边宽度</span>
+        <input type="number" id="outline" min="0" max="10" step="0.5" placeholder="0 = 自带">
+      </label>
+      <label class="field">
+        <span>底部边距 MarginV</span>
+        <input type="number" id="marginV" min="0" max="400" step="2" placeholder="0 = 自动错位">
+      </label>
+      <label class="field">
+        <span>字体颜色（ASS 格式）</span>
+        <input type="text" id="primaryColour" placeholder="例如 &H00FFFFFF = 白色">
+      </label>
+      <label class="field checkbox-field">
+        <input type="checkbox" id="stackSubtitles">
+        <span>多字幕时从底部向上错位显示</span>
+      </label>
+      <label class="field checkbox-field">
+        <input type="checkbox" id="useEmbeddedFonts">
+        <span>使用 MKV 内嵌字体附件</span>
+      </label>
+    </div>
+    <p class="hint">硬字幕会改变画面像素，必须重新编码。本工具不降低分辨率与帧率，音轨默认直接复制。</p>
+  </section>
+
+  </div><!-- /panel-subtitle -->
+
+  <div class="tab-panel hidden" id="panel-merge">
+
+  <!-- 合并片段 -->
+  <section class="card">
+    <div class="card-head">
+      <h2>合并片段 <span class="muted">按列表顺序首尾相接</span></h2>
+      <div class="head-actions">
+        <button class="btn btn-primary" id="mergePickBtn">选择视频</button>
+        <button class="btn" id="mergeScanBtn">扫描文件夹</button>
+        <button class="btn btn-ghost" id="mergeNativePickBtn" title="调用 Windows 原生文件选择框，弹不出来时会自动改用内置浏览器">系统弹窗</button>
+        <button class="btn btn-ghost" id="mergeClearBtn">清空</button>
+      </div>
+    </div>
+    <div id="mergeList" class="merge-list">
+      <p class="empty">还没有选择视频。选择两段以上，按顺序合并成一条 4K 60fps 视频。</p>
+    </div>
+  </section>
+
+  <!-- 合并输出设置 -->
+  <section class="card">
+    <div class="card-head">
+      <h2>输出规格</h2>
+      <div class="spec-badge">3840×2160 · 60fps（固定）</div>
+    </div>
+    <div class="grid">
+      <label class="field">
+        <span>视频码率（Mbps）</span>
+        <input type="number" id="mergeBitrate" min="1" max="500" step="1">
+      </label>
+      <label class="field">
+        <span>音轨码率（kbps）</span>
+        <input type="number" id="mergeAudioKbps" min="32" max="640" step="32">
+      </label>
+      <label class="field">
+        <span>输出容器</span>
+        <select id="mergeContainer">
+          <option value="mp4">MP4（兼容性最好）</option>
+          <option value="mkv">MKV</option>
+          <option value="mov">MOV</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>画面适配</span>
+        <select id="mergeFit">
+          <option value="pad">保持比例 + 黑边（不变形）</option>
+          <option value="crop">裁切铺满（不变形，裁掉边缘）</option>
+          <option value="stretch">拉伸铺满（画面会变形）</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>CPU 编码预设</span>
+        <select id="mergePreset">
+          <option value="veryslow">veryslow（最省码率）</option>
+          <option value="slower">slower</option>
+          <option value="slow">slow</option>
+          <option value="medium">medium</option>
+          <option value="fast">fast（默认）</option>
+          <option value="veryfast">veryfast</option>
+          <option value="ultrafast">ultrafast（最快）</option>
+        </select>
+      </label>
+      <label class="field wide">
+        <span>输出目录</span>
+        <div class="row">
+          <input type="text" id="mergeOutputDir" placeholder="留空表示与第一段视频同目录">
+          <button class="btn btn-ghost" id="mergePickOutputDirBtn">浏览</button>
+        </div>
+      </label>
+    </div>
+  </section>
+
+  <!-- 合并预估 -->
+  <section class="card">
+    <div class="card-head">
+      <h2>合并预估</h2>
+      <span id="mergeStateHint" class="muted"></span>
+    </div>
+    <div class="estimate">
+      <div class="est-hero">
+        <div class="est-size" id="estSize">--</div>
+        <div class="est-label" id="estSizeLabel">合并后预计文件大小</div>
+      </div>
+      <div class="est-grid">
+        <div><b id="estDuration">--</b><span>总时长</span></div>
+        <div><b>3840×2160 · 60fps</b><span>输出规格</span></div>
+        <div><b id="estBitrate">--</b><span>视频 + 音轨码率</span></div>
+        <div><b id="estClips">0</b><span>片段数</span></div>
+      </div>
+    </div>
+    <p class="hint" id="estNote"></p>
+    <div id="estWarnings" class="warn-box hidden"></div>
+    <div class="merge-actions">
+      <button class="btn btn-primary btn-lg" id="mergeStartBtn">开始合并</button>
+      <button class="btn btn-lg" id="mergeMeasureBtn">实测校准</button>
+      <span class="hint" id="mergeActionHint">默认按目标码率算上限；点「实测校准」抽每段中间 2 秒真编码，得到更接近真实的大小。</span>
+    </div>
+  </section>
+
+  </div><!-- /panel-merge -->
+
+  <div class="tab-panel hidden" id="panel-resources">
+
+  <!-- 添加网盘链接 -->
+  <section class="card">
+    <div class="card-head">
+      <h2>添加网盘资源</h2>
+      <div class="head-actions">
+        <button class="btn btn-ghost" id="resExportBtn">导出</button>
+        <button class="btn btn-ghost" id="resImportBtn">导入</button>
+      </div>
+    </div>
+    <div class="res-add">
+      <textarea id="resInput" rows="4" placeholder="一行一个链接，可同时粘贴同一资源的夸克 + 百度：&#10;https://pan.quark.cn/s/xxxxxxxx 提取码：abcd&#10;https://pan.baidu.com/s/1xxxxxxxx?pwd=efgh"></textarea>
+      <div class="res-add-row">
+        <input type="text" id="resTitle" placeholder="标题（留空自动填，例如：斗破苍穹 第1季）">
+        <input type="text" id="resTags" placeholder="标签，逗号分隔（留空自动从标题猜）">
+        <select id="resGroupPick" class="mini-select" title="加到哪个分组"></select>
+        <select id="resStatusPick" class="mini-select" title="资源状态">
+          <option value="updating">在更</option>
+          <option value="finished">已完结</option>
+          <option value="dead">已失效</option>
+        </select>
+        <button class="btn btn-primary" id="resAddBtn">添加资源</button>
+      </div>
+    </div>
+    <p class="hint">同一部资源有夸克和百度两个链接时，<b>一次全贴进来</b>（一行一个），
+      标题、分组、标签、状态只填一次，会分别存成两条，各自的提取码互不干扰。
+      夸克 / 百度网盘添加后会自动读取目录和文件，不需要登录；
+      资源第一次读取后会自动记住文件清单，之后出现新文件会在列表里提示「🆕 更新」。</p>
+  </section>
+
+  <!-- 资源列表 -->
+  <section class="card">
+    <div class="card-head">
+      <h2>我的资源 <span id="resSummary" class="muted"></span></h2>
+      <div class="head-actions">
+        <button class="btn btn-ghost" id="resToPansouBtn" title="去盘搜按关键词找更多资源">去盘搜找资源</button>
+        <button class="btn btn-ghost" id="resTrashBtn"><span id="resTrashLabel">回收站</span> <span id="resTrashCount" class="muted"></span></button>
+        <button class="btn btn-ghost hidden" id="resTrashClearBtn">清空回收站</button>
+        <input type="text" id="resSearch" class="search-input" placeholder="搜索标题 / 标签 / 文件名">
+        <select id="resProviderFilter" class="mini-select">
+          <option value="">全部网盘</option>
+          <option value="quark">夸克</option>
+          <option value="baidu">百度</option>
+          <option value="other">其它</option>
+        </select>
+        <select id="resStatusFilter" class="mini-select">
+          <option value="">全部状态</option>
+          <option value="updating">在更</option>
+          <option value="finished">已完结</option>
+          <option value="dead">已失效</option>
+        </select>
+      </div>
+    </div>
+    <div id="resUpdateBar" class="update-bar">
+      <button class="tag-chip" id="resUpdatesChip" data-updates="1">🆕 只看有更新</button>
+      <button class="btn" id="resCheckUpdatesBtn">检查更新</button>
+      <button class="btn btn-ghost" id="resStopCheckBtn">停止检查</button>
+      <button class="btn btn-ghost" id="resAckAllBtn">全部标记已读</button>
+      <label class="auto-check"><input type="checkbox" id="resAutoCheck"> 自动检查</label>
+      <select id="resAutoHours" class="mini-select" title="自动检查的间隔">
+        <option value="3">每 3 小时</option>
+        <option value="6">每 6 小时</option>
+        <option value="12">每 12 小时</option>
+        <option value="24">每 24 小时</option>
+      </select>
+      <span id="resUpdateHint" class="muted"></span>
+    </div>
+    <div id="resGroupBar" class="group-bar"></div>
+    <div id="resTagBar" class="tag-bar"></div>
+    <div id="resTitleBar" class="tag-bar title-bar"></div>
+    <div id="resBulkBar" class="bulk-bar hidden">
+      <span id="resBulkCount" class="muted"></span>
+      <select id="resBulkGroup" class="mini-select"></select>
+      <button class="btn" id="resBulkMoveBtn">移动</button>
+      <button class="btn btn-ghost" id="resBulkClearBtn">取消选择</button>
+    </div>
+    <div id="resList" class="res-list">
+      <p class="empty">还没有保存任何网盘资源。把链接粘到上面即可。</p>
+    </div>
+  </section>
+
+  </div><!-- /panel-resources -->
+
+  <div class="tab-panel hidden" id="panel-pansou">
+
+  <!-- 搜索 -->
+  <section class="card">
+    <div class="card-head">
+      <h2>盘搜</h2>
+      <div class="head-actions">
+        <span id="psStatus" class="muted"></span>
+      </div>
+    </div>
+    <div class="res-add">
+      <div class="res-add-row">
+        <input type="text" id="psInput" placeholder="搜片名，例如：斗破苍穹 年番、凡人修仙传">
+        <button class="btn btn-primary" id="psSearchBtn">搜索</button>
+        <button class="btn btn-ghost" id="psRefreshBtn" title="忽略缓存重新搜">重新搜索</button>
+      </div>
+      <div class="ps-filter-row">
+        <button class="tag-chip active" id="psPlatformAll" data-ps-platform="all">全部</button>
+        <span id="psPlatformBar" class="tag-bar"></span>
+        <label class="ps-only"><input type="checkbox" id="psOnlyMatch" checked> 只看标题含关键词</label>
+      </div>
+      <div id="psRelatedBar" class="tag-bar"></div>
+    </div>
+    <p class="hint">搜到的结果点「查看」可以直接读出网盘里的文件清单（夸克 / 百度支持），
+      不用跳转到网盘；看中了的「保存到我的资源」，保存时可以选分组 / 状态 / 标签，
+      也可以勾选多条批量保存。已经存过的会标「已保存」，不会重复添加。</p>
+  </section>
+
+  <!-- 结果 -->
+  <section class="card">
+    <div class="card-head">
+      <h2>搜索结果 <span id="psSummary" class="muted"></span></h2>
+      <div class="head-actions">
+        <label class="ps-only"><input type="checkbox" id="psHideSaved"> 隐藏已保存</label>
+      </div>
+    </div>
+    <div id="psBulkBar" class="bulk-bar hidden">
+      <span id="psBulkCount" class="muted"></span>
+      <button class="btn btn-ghost" id="psSelectAllBtn">全选当前结果</button>
+      <button class="btn btn-ghost" id="psClearSelBtn">清空选择</button>
+      <button class="btn btn-primary" id="psSaveSelectedBtn">保存选中的到我的资源</button>
+    </div>
+    <div id="psList" class="res-list"></div>
+    <div class="ps-more">
+      <button class="btn btn-ghost hidden" id="psMoreBtn">加载更多</button>
+    </div>
+  </section>
+
+  </div><!-- /panel-pansou -->
+
+  <!-- 队列 -->
+  <section class="card">
+    <div class="card-head">
+      <h2>任务队列 <span id="queueSummary" class="muted"></span></h2>
+      <div class="head-actions">
+        <button class="btn" id="stopQueueBtn">停止队列</button>
+        <button class="btn" id="startQueueBtn">继续 / 开始</button>
+        <button class="btn btn-ghost" id="clearFinishedBtn">清空已完成</button>
+      </div>
+    </div>
+    <div id="jobList" class="job-list">
+      <p class="empty">队列为空。</p>
+    </div>
+  </section>
+
+</main>
+
+<!-- 文件浏览弹窗 -->
+<div class="modal hidden" id="browserModal">
+  <div class="modal-panel">
+    <div class="modal-head">
+      <h3 id="browserTitle">选择视频</h3>
+      <button class="icon-btn" id="browserClose">✕</button>
+    </div>
+    <div class="browser-bar">
+      <div id="browserLinks" class="links"></div>
+      <input type="text" id="browserPath" placeholder="当前目录">
+      <label class="mini-check"><input type="checkbox" id="browserRecursive"> 包含子目录</label>
+    </div>
+    <div id="browserList" class="browser-list"></div>
+    <div class="modal-foot">
+      <span id="browserHint" class="muted"></span>
+      <div>
+        <button class="btn btn-ghost" id="browserCancel">取消</button>
+        <button class="btn btn-primary" id="browserOk">确定</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 网盘文件浏览弹窗 -->
+<div class="modal hidden" id="filesModal">
+  <div class="modal-panel modal-wide">
+    <div class="modal-head">
+      <h3 id="filesTitle">文件列表</h3>
+      <button class="icon-btn" id="filesClose">✕</button>
+    </div>
+    <div class="browser-bar">
+      <input type="text" id="filesFilter" placeholder="过滤文件名">
+      <span class="muted" id="filesStats"></span>
+    </div>
+    <div id="filesTree" class="files-tree"></div>
+    <div class="modal-foot">
+      <span id="filesHint" class="muted"></span>
+      <div>
+        <button class="btn btn-ghost hidden" id="filesAckBtn">标记已读</button>
+        <button class="btn btn-ghost" id="filesCopyBtn">复制文件清单</button>
+        <button class="btn" id="filesReloadBtn">重新读取</button>
+        <button class="btn btn-primary" id="filesOpenBtn">在浏览器打开</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 资源编辑弹窗 -->
+<div class="modal hidden" id="resEditModal">
+  <div class="modal-panel">
+    <div class="modal-head">
+      <h3 id="resEditTitle">编辑资源</h3>
+      <button class="icon-btn" id="resEditClose">✕</button>
+    </div>
+    <div class="res-edit">
+      <label class="field">
+        <span class="field-label">标题</span>
+        <input type="text" id="resEditName" placeholder="例如：斗破苍穹 第1季 1080p">
+      </label>
+      <div id="resEditSuggest" class="suggest"></div>
+      <label class="field">
+        <span class="field-label">标签</span>
+        <input type="text" id="resEditTags" placeholder="逗号分隔，例如：斗破苍穹,国漫">
+      </label>
+      <label class="field">
+        <span class="field-label">分组</span>
+        <select id="resEditGroup" class="mini-select"></select>
+      </label>
+      <label class="field">
+        <span class="field-label">状态</span>
+        <select id="resEditStatus" class="mini-select"></select>
+      </label>
+      <label class="field">
+        <span class="field-label">备注</span>
+        <textarea id="resEditNote" rows="2" placeholder="选填，例如：B站搬运用 / 字幕已内嵌"></textarea>
+      </label>
+      <div class="res-add-row">
+        <label class="field">
+          <span class="field-label">提取码</span>
+          <input type="text" id="resEditCode" placeholder="没有就留空">
+        </label>
+        <label class="field">
+          <span class="field-label">链接</span>
+          <input type="text" id="resEditUrl" placeholder="https://pan.quark.cn/s/...">
+        </label>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <span id="resEditHint" class="muted"></span>
+      <div>
+        <button class="btn btn-ghost" id="resEditCancel">取消</button>
+        <button class="btn btn-primary" id="resEditSave">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 盘搜结果详情 -->
+<div class="modal hidden" id="psModal">
+  <div class="modal-panel ps-panel">
+    <div class="modal-head">
+      <h3 id="psDetailTitle">资源详情</h3>
+      <button class="icon-btn" id="psClose">✕</button>
+    </div>
+    <div class="ps-detail">
+      <div class="ps-meta-row">
+        <span id="psDetailPlatform" class="chip chip-quark"></span>
+        <span id="psDetailSource" class="muted"></span>
+      </div>
+      <div class="field">
+        <span class="field-label">链接</span>
+        <div class="ps-link-row">
+          <input type="text" id="psDetailUrl" readonly>
+          <button class="btn btn-ghost" id="psCopyUrl">复制</button>
+          <button class="btn btn-ghost" id="psOpenUrl">浏览器打开</button>
+        </div>
+      </div>
+      <div class="field" id="psCodeField">
+        <span class="field-label">提取码</span>
+        <div class="ps-link-row">
+          <input type="text" id="psDetailCode" readonly>
+          <button class="btn btn-ghost" id="psCopyCode">复制</button>
+        </div>
+      </div>
+      <div class="field">
+        <div class="ps-files-head">
+          <span class="field-label">网盘里的文件</span>
+          <button class="btn btn-ghost" id="psReloadFiles" title="重新读取">重新读取</button>
+        </div>
+        <div id="psFilesHint" class="muted"></div>
+        <div id="psFilesTree" class="file-tree"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <span id="psDetailHint" class="muted"></span>
+      <div>
+        <button class="btn btn-ghost" id="psCancel">关闭</button>
+        <button class="btn btn-primary" id="psSave">保存到我的资源</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 盘搜：保存到我的资源 -->
+<div class="modal hidden" id="psSaveModal">
+  <div class="modal-panel">
+    <div class="modal-head">
+      <h3 id="psSaveTitle">保存到我的资源</h3>
+      <button class="icon-btn" id="psSaveClose">✕</button>
+    </div>
+    <div class="edit-form">
+      <p id="psSaveHint" class="hint"></p>
+      <label class="field">
+        <span class="field-label">标题</span>
+        <input type="text" id="psSaveName" placeholder="留空就用搜索结果的标题">
+      </label>
+      <label class="field">
+        <span class="field-label">分组</span>
+        <select id="psSaveGroup" class="mini-select"></select>
+      </label>
+      <label class="field">
+        <span class="field-label">状态</span>
+        <select id="psSaveStatus" class="mini-select"></select>
+      </label>
+      <label class="field">
+        <span class="field-label">标签</span>
+        <input type="text" id="psSaveTags" placeholder="逗号分隔，留空自动从标题猜">
+      </label>
+    </div>
+    <div class="modal-foot">
+      <span id="psSaveMsg" class="muted"></span>
+      <div>
+        <button class="btn btn-ghost" id="psSaveCancel">取消</button>
+        <button class="btn btn-ghost hidden" id="psSaveGoLibrary">去资源库查看</button>
+        <button class="btn btn-primary" id="psSaveConfirm">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast hidden" id="toast"></div>
+
+<!-- 手机访问：扫码或手输地址 -->
+<div class="modal hidden" id="lanModal">
+  <div class="modal-panel modal-narrow">
+    <div class="modal-head">
+      <h3>用手机访问</h3>
+      <button class="icon-btn" id="lanClose">✕</button>
+    </div>
+    <div class="lan-body">
+      <div id="lanQr" class="lan-qr"></div>
+      <div class="lan-info">
+        <p id="lanTip" class="hint"></p>
+        <div id="lanUrls" class="lan-urls"></div>
+        <div id="lanTs" class="lan-ts hidden"></div>
+      </div>
+    </div>
+    <div class="lan-sec">
+      <div class="lan-sec-title">访问控制</div>
+      <label class="mini-check">
+        <input type="checkbox" id="lanAccessToggle">
+        允许手机访问（关掉后只有本机能用，重启后生效）
+      </label>
+      <div class="lan-row">
+        <input type="password" id="lanPwd" placeholder="访问密码（留空表示不设密码）"
+               autocomplete="new-password">
+        <button class="btn btn-ghost btn-sm" id="lanPwdSave">设密码</button>
+        <button class="btn btn-ghost btn-sm" id="lanPwdClear">清除</button>
+      </div>
+      <p id="lanPwdState" class="hint"></p>
+      <div class="lan-row">
+        <input type="text" id="lanIps"
+               placeholder="只允许这些 IP / 网段，如 100.64.0.0/10, 192.168.71.0/24">
+        <button class="btn btn-ghost btn-sm" id="lanIpsSave">保存</button>
+      </div>
+      <div id="lanIpsQuick" class="lan-quick"></div>
+      <p class="hint">本机 127.0.0.1 永远放行。你这次是用 <code id="lanMyIp">-</code> 连进来的。</p>
+    </div>
+    <div class="modal-foot">
+      <span class="muted">同一个 WiFi 直接扫上面的码；走流量要先装 Tailscale。Windows 首次可能弹防火墙，选“允许访问”</span>
+      <div>
+        <button class="btn btn-ghost" id="lanCopy">复制地址</button>
+        <button class="btn btn-primary" id="lanClose2">关闭</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="qrcode.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
