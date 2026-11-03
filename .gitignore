@@ -13,3 +13,13 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# ---------- vidstb-desktop (Python) ----------
+__pycache__/
+*.py[cod]
+
+# 运行时数据：资源库、回收站、数据库、日志、临时文件 —— 个人数据，不入库
+vidstb-desktop/runtime/
+
+# 本机配置：含云端口令、百度 Cookie 等私密信息，绝不入库
+vidstb-desktop/config.json

@@ -71,6 +71,12 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     # IP 白名单：只放行这些 IP 或网段（支持 CIDR），留空表示不限制。
     # 例：["100.64.0.0/10", "192.168.71.0/24"] —— 前者是 Tailscale 网段
     "allowed_ips": [],
+    # ---------- 云端同步 ----------
+    # 云端资源库地址（vidstb-cloud），例如 http://124.220.134.241:8777。
+    # 留空表示没配置，「云端同步」弹窗会提示先填地址。
+    "cloud_url": "",
+    # 云端访问口令（明文存在本机 config.json，和百度 Cookie 一个性质）
+    "cloud_password": "",
 }
 
 

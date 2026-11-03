@@ -272,6 +272,7 @@
     <div class="card-head">
       <h2>添加网盘资源</h2>
       <div class="head-actions">
+        <button class="btn btn-ghost" id="cloudSyncBtn">☁ 云端同步</button>
         <button class="btn btn-ghost" id="resExportBtn">导出</button>
         <button class="btn btn-ghost" id="resImportBtn">导入</button>
       </div>
@@ -458,6 +459,38 @@
         <button class="btn btn-ghost" id="filesCopyBtn">复制文件清单</button>
         <button class="btn" id="filesReloadBtn">重新读取</button>
         <button class="btn btn-primary" id="filesOpenBtn">在浏览器打开</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 云端同步弹窗 -->
+<div class="modal hidden" id="cloudModal">
+  <div class="modal-panel">
+    <div class="modal-head">
+      <h3>云端同步</h3>
+      <button class="icon-btn" id="cloudClose">✕</button>
+    </div>
+    <div class="res-edit">
+      <p class="hint" style="margin-top:0">
+        和云服务器上的资源库双向同步：本地有的推上去，云端有的拉下来。
+        删除也会同步（以回收站为准），重复条目按「最后修改的为准」合并。
+      </p>
+      <label class="field">
+        <span class="field-label">服务器地址</span>
+        <input type="text" id="cloudUrl" placeholder="例如：http://124.220.134.241:8777">
+      </label>
+      <label class="field">
+        <span class="field-label">访问口令</span>
+        <input type="password" id="cloudPassword" placeholder="云端的访问口令" autocomplete="off">
+      </label>
+      <div class="hint" id="cloudStatus" style="min-height:20px"></div>
+    </div>
+    <div class="modal-foot">
+      <span class="muted" id="cloudLastSync"></span>
+      <div>
+        <button class="btn btn-ghost" id="cloudSaveBtn">保存设置</button>
+        <button class="btn btn-primary" id="cloudStartBtn">开始同步</button>
       </div>
     </div>
   </div>

@@ -27,7 +27,7 @@ from urllib.parse import parse_qs, urlparse
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from app import access, config as config_module, ffmpeg_tool, fs_browse, hardware, merger, paths  # noqa: E402
-from app import baidu, lan, pansou, quark, resources as resources_module  # noqa: E402
+from app import baidu, cloudsync, lan, pansou, quark, resources as resources_module  # noqa: E402
 from app.jobs import JobManager  # noqa: E402
 
 # 项目根目录：打包成 exe 后由 paths 负责定位（保证和 python server.py 同一份数据）
@@ -97,7 +97,41 @@ class Application:
         self.pansou_file_cache: dict = {}
         self._pansou_related: dict = {}
         self._pansou_lock = threading.RLock()
+        # 云端同步任务：同一时间只跑一个，状态给前端轮询
+        self._cloud_sync_state: dict = {"status": "idle"}
+        self._cloud_sync_lock = threading.Lock()
         threading.Thread(target=self._auto_update_loop, daemon=True).start()
+
+    # ---------- 云端同步 ----------
+    def cloud_sync_state(self) -> dict:
+        with self._cloud_sync_lock:
+            return dict(self._cloud_sync_state)
+
+    def start_cloud_sync(self) -> dict:
+        with self._cloud_sync_lock:
+            if self._cloud_sync_state.get("status") == "running":
+                return dict(self._cloud_sync_state)
+            self._cloud_sync_state = {"status": "running", "message": "正在同步…",
+                                      "started_at": time.time()}
+
+        def worker() -> None:
+            try:
+                summary = cloudsync.sync_now(self.resource_store, self.config)
+                state = {"status": "done", "summary": summary,
+                         "finished_at": time.time()}
+            except cloudsync.SyncError as error:
+                state = {"status": "error", "error": str(error),
+                         "finished_at": time.time()}
+            except Exception as error:  # noqa: BLE001  # 后台线程不能把异常吞了
+                state = {"status": "error",
+                         "error": f"同步中断：{type(error).__name__} {error}",
+                         "finished_at": time.time()}
+            with self._cloud_sync_lock:
+                self._cloud_sync_state = state
+            self._on_change()     # 同步改了数据，通知所有页面刷新
+
+        threading.Thread(target=worker, daemon=True).start()
+        return self.cloud_sync_state()
 
     # ---------- 事件推送 ----------
     def _on_change(self) -> None:
@@ -828,6 +862,11 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json({"ok": True,
                              "groups": self.app.resource_store.groups_with_stats()})
             return
+        if path == "/api/cloud/sync":
+            self._send_json({"ok": True, "task": self.app.cloud_sync_state(),
+                             "last": self.app.resource_store.meta.get(
+                                 "last_cloud_sync")})
+            return
         if path == "/api/pansou/files":
             task = self.app.pansou_files_task((query.get("id", [""])[0] or ""))
             self._send_json(task or {"id": "", "status": "idle",
@@ -1089,6 +1128,12 @@ class Handler(BaseHTTPRequestHandler):
             added = self.app.resource_store.import_items(payload.get("items") or [])
             self._send_json({"ok": True, "added": added})
             self.app._on_change()
+            return
+        if path == "/api/cloud/sync":
+            # 与云端资源库双向同步（推本地 + 拉云端，云端做合并）
+            # 大库同步可能跑几十秒，放后台线程，界面轮询 GET /api/cloud/sync
+            state = self.app.start_cloud_sync()
+            self._send_json({"ok": True, "task": state})
             return
         if path == "/api/groups":
             group = self.app.resource_store.create_group(payload.get("name", ""))

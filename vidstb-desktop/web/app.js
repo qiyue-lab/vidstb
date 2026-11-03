@@ -1567,6 +1567,97 @@ function closeResEdit() {
   $('resEditModal').classList.add('hidden');
 }
 
+/* ---------------- 云端同步 ---------------- */
+
+const cloudSync = { polling: null };
+
+function openCloudSync() {
+  $('cloudUrl').value = state.config.cloud_url || '';
+  $('cloudPassword').value = state.config.cloud_password || '';
+  $('cloudStatus').textContent = '';
+  $('cloudModal').classList.remove('hidden');
+  cloudRefreshStatus();
+}
+
+function closeCloudSync() {
+  $('cloudModal').classList.add('hidden');
+}
+
+function cloudSetStatus(text, isError) {
+  const el = $('cloudStatus');
+  el.textContent = text || '';
+  el.style.color = isError ? 'var(--danger, #dc2626)' : '';
+}
+
+function cloudFormatSummary(summary) {
+  if (!summary) return '';
+  const parts = [];
+  if (summary.added) parts.push(`新增 ${summary.added}`);
+  if (summary.updated) parts.push(`更新 ${summary.updated}`);
+  if (summary.deleted) parts.push(`删除 ${summary.deleted}`);
+  if (summary.groups_added) parts.push(`新分组 ${summary.groups_added}`);
+  const detail = parts.length ? parts.join('、') : '没有变化';
+  return `上次同步：共 ${summary.total} 条（${detail}）`;
+}
+
+async function cloudRefreshStatus() {
+  try {
+    const data = await apiGet('/api/cloud/sync');
+    const task = data.task || {};
+    if (task.status === 'running') {
+      cloudSetStatus(task.message || '正在同步…');
+      $('cloudStartBtn').disabled = true;
+      return;
+    }
+    $('cloudStartBtn').disabled = false;
+    if (task.status === 'error') {
+      cloudSetStatus(`同步失败：${task.error || '未知错误'}`, true);
+    } else if (task.status === 'done' && task.summary) {
+      cloudSetStatus(cloudFormatSummary(task.summary));
+    } else if (data.last) {
+      cloudSetStatus(cloudFormatSummary(data.last));
+    }
+  } catch (e) { /* 状态拉不到不影响弹窗打开 */ }
+}
+
+async function cloudSaveSettings(showToast = true) {
+  const url = $('cloudUrl').value.trim();
+  const password = $('cloudPassword').value;
+  await apiPost('/api/config', { cloud_url: url, cloud_password: password });
+  state.config.cloud_url = url;
+  state.config.cloud_password = password;
+  if (showToast) toast('云端设置已保存');
+}
+
+async function cloudStartSync() {
+  await cloudSaveSettings(false);
+  if (!state.config.cloud_url) {
+    cloudSetStatus('先填服务器地址再同步', true);
+    return;
+  }
+  $('cloudStartBtn').disabled = true;
+  cloudSetStatus('正在同步…（大库可能要几十秒）');
+  await apiPost('/api/cloud/sync', {});
+  // 轮询任务状态，同步完成后刷新资源列表
+  if (cloudSync.polling) clearInterval(cloudSync.polling);
+  cloudSync.polling = setInterval(async () => {
+    const data = await apiGet('/api/cloud/sync');
+    const task = data.task || {};
+    if (task.status === 'running') return;
+    clearInterval(cloudSync.polling);
+    cloudSync.polling = null;
+    $('cloudStartBtn').disabled = false;
+    if (task.status === 'error') {
+      cloudSetStatus(`同步失败：${task.error || '未知错误'}`, true);
+      toast('云端同步失败');
+      return;
+    }
+    cloudSetStatus(cloudFormatSummary(task.summary));
+    toast('云端同步完成');
+    await resReload();
+  }, 1000);
+}
+
 async function resSaveEdit() {
   const id = resEdit.id;
   if (!id) return;
@@ -2410,6 +2501,13 @@ function bindEvents() {
   $('resEditSave').addEventListener('click', resSaveEdit);
   $('resEditCancel').addEventListener('click', closeResEdit);
   $('resEditClose').addEventListener('click', closeResEdit);
+  $('cloudSyncBtn').addEventListener('click', openCloudSync);
+  $('cloudClose').addEventListener('click', closeCloudSync);
+  $('cloudModal').addEventListener('click', (event) => {
+    if (event.target === $('cloudModal')) closeCloudSync();
+  });
+  $('cloudSaveBtn').addEventListener('click', () => cloudSaveSettings(true));
+  $('cloudStartBtn').addEventListener('click', cloudStartSync);
   $('resEditModal').addEventListener('click', (event) => {
     if (event.target === $('resEditModal')) closeResEdit();
     if (event.target.id === 'resEditUseSuggest') {
